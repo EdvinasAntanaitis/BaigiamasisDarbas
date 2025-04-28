@@ -1,4 +1,4 @@
-package lt.code.samples.maven.logIn;
+package lt.code.samples.maven.controller;
 
 import org.springframework.ui.Model;
 import lombok.RequiredArgsConstructor;

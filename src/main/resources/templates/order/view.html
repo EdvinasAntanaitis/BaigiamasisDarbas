@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>HomePage</title>
+</head>
+<body>
+<h2 th:text="'Order #' + ${order.id} + ' - ' + ${order.orderName}"></h2>
+<p><strong>Paint:</strong> <span th:text="${order.paintColor}"></span></p>
+<p><strong>Material:</strong> <span th:text="${order.material}"></span></p>
+<p><strong>Created:</strong> <span th:text="${#temporals.format(order.creationDate, 'yyyy-MM-dd HH:mm')}"></span></p>
+<p><strong>Description:</strong></p>
+<p th:text="${order.description}"></p>
+
+<h3>Items</h3>
+<table>
+    <tr>
+        <th>Length</th><th>Width</th><th>Thickness</th><th>Amount</th><th>Sides</th>
+    </tr>
+    <tr th:each="item : ${order.items}">
+        <td th:text="${item.length}"></td>
+        <td th:text="${item.width}"></td>
+        <td th:text="${item.thickness}"></td>
+        <td th:text="${item.amount}"></td>
+        <td th:text="${item.sides}"></td>
+    </tr>
+</table>
+
+<h3>Work Log</h3>
+<table>
+    <tr>
+        <th>Worker</th><th>Start</th><th>End</th>
+    </tr>
+    <tr th:each="log : ${order.workLogs}">
+        <td th:text="${log.workerName}"></td>
+        <td th:text="${#temporals.format(log.startTime, 'yyyy-MM-dd HH:mm')}"></td>
+        <td th:text="${#temporals.format(log.endTime, 'yyyy-MM-dd HH:mm')}"></td>
+    </tr>
+</table>
+
+
+</body>
+</html>

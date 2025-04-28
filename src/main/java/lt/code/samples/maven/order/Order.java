@@ -2,38 +2,30 @@ package lt.code.samples.maven.order;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lt.code.samples.maven.worker.WorkLog;
 
-@Data
-@NoArgsConstructor
+import java.time.LocalDateTime;
+import java.util.List;
+
+
 @Entity
-@Table(name = "orders")
+@Data
 public class Order {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "order_name", nullable = false)
     private String orderName;
-
+    private String paintColor;
     private String material;
-    private String color;
-    private String barcode;
-    private double length;
-    private double width;
-    private double thickness;
-    private int amount;
+    private LocalDateTime creationDate;
+
+    @Lob
     private String description;
 
-    @Column(name = "edge_type")
-    private String edgeType;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<OrderItem> items;
 
-    private String status;
-
-    @Column(name = "edited_by")
-    private String editedBy;
-
-    @Column(name = "created_at")
-    private String createdAt;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<WorkLog> workLogs;
 }
