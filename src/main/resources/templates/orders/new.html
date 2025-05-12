@@ -92,13 +92,13 @@
 
             switch (painted) {
                 case "ONE_EDGE":
-                    areaPerPiece = width * thickness;
+                    areaPerPiece = length * thickness;
                     break;
                 case "TWO_EDGES":
-                    areaPerPiece = 2 * width * thickness;
+                    areaPerPiece = 2 * length * thickness;
                     break;
                 case "THREE_EDGES":
-                    areaPerPiece = 2 * width * thickness + length * thickness;
+                    areaPerPiece = 2 * length * thickness + width * thickness;
                     break;
                 case "ONE_SIDE_NO_EDGES":
                     areaPerPiece = length * width;
@@ -106,8 +106,11 @@
                 case "ONE_SIDE_WITH_EDGES":
                     areaPerPiece = length * width + 2 * (length * thickness + width * thickness);
                     break;
-                default: // ALL_SIDES
-                    areaPerPiece = length * width;
+                case "ALL_SIDES":
+                default:
+
+                    areaPerPiece = 2 * (length * width) + 2 * (length * thickness) + 2 * (width * thickness);
+                    break;
             }
 
             const totalRowArea = (areaPerPiece * amount) / 1_000_000;
@@ -117,6 +120,7 @@
 
         document.getElementById("totalArea").textContent = totalArea.toFixed(3);
     }
+
 
     function removeRow(button) {
         const row = button.closest("tr");
