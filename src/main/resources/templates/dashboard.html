@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dashboard</title>
+</head>
+<body>
+
+<h1>Welcome to the Dashboard!</h1>
+
+
+<hr>
+
+<h2>Navigation</h2>
+
+<ul>
+    <li><a th:href="@{/orders/new}"> Create New Order</a></li>
+    <li><a th:href="@{/orders}"> View Order List</a></li>
+    <li><a th:href="@{/orders/details}"> View Order Details</a></li>
+    <li><a th:href="@{/logout}"> Logout</a></li>
+</ul>
+
+</body>
+</html>
