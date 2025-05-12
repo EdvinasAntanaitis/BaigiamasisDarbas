@@ -18,6 +18,30 @@
     <label>Paint Color:</label><br>
     <input type="text" th:field="*{paintColor}" required><br><br>
 
+    <table>
+        <thead>
+        <tr>
+            <th>Length (mm)</th>
+            <th>Width (mm)</th>
+            <th>Thickness (mm)</th>
+            <th>Amount</th>
+            <th>Painted Areas</th>
+            <th>Area (m²)</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody id="partsTableBody"></tbody>
+        <tfoot>
+        <tr>
+            <td colspan="5" style="text-align: right;"><strong>Total Area (m²):</strong></td>
+            <td id="totalArea">0.000</td>
+            <td></td>
+        </tr>
+        </tfoot>
+    </table>
+
+    <button type="button" onclick="addPartRow()">Add Part</button><br><br>
+
     <label>Description:</label><br>
     <textarea th:field="*{description}" rows="5" cols="40"></textarea><br><br>
 
@@ -25,7 +49,81 @@
 </form>
 
 <br>
-<a th:href="@{/dashboard}"> Back to Dashboard</a>
+<a th:href="@{/dashboard}">Back to Dashboard</a>
+
+<script>
+    function addPartRow() {
+        const table = document.getElementById("partsTableBody");
+        const index = table.rows.length;
+        const row = table.insertRow();
+        row.innerHTML = `
+            <td><input type="number" name="parts[${index}].length" class="length" required oninput="calculateAll()" /></td>
+            <td><input type="number" name="parts[${index}].width" class="width" required oninput="calculateAll()" /></td>
+            <td><input type="number" name="parts[${index}].thickness" required oninput="calculateAll()" /></td>
+            <td><input type="number" name="parts[${index}].amount" value="1" min="1" required oninput="calculateAll()" /></td>
+            <td>
+                <select name="parts[${index}].paintedArea" onchange="calculateAll()">
+                    <option value="ALL_SIDES">Visa detalė (default)</option>
+                    <option value="ONE_EDGE">Viena briauna</option>
+                    <option value="TWO_EDGES">Dvi briaunos</option>
+                    <option value="THREE_EDGES">Trys briaunos</option>
+                    <option value="ONE_SIDE_NO_EDGES">Viena pusė be briaunų</option>
+                    <option value="ONE_SIDE_WITH_EDGES">Viena pusė su briaunomis</option>
+                </select>
+            </td>
+            <td class="area">0.000</td>
+            <td><button type="button" onclick="removeRow(this)">Remove</button></td>
+        `;
+    }
+
+    function calculateAll() {
+        const rows = document.querySelectorAll("#partsTableBody tr");
+        let totalArea = 0;
+
+        rows.forEach(row => {
+            const length = parseFloat(row.querySelector(".length")?.value) || 0;
+            const width = parseFloat(row.querySelector(".width")?.value) || 0;
+            const thickness = parseFloat(row.querySelector("[name*='thickness']")?.value) || 0;
+            const amount = parseInt(row.querySelector("[name*='amount']")?.value) || 1;
+            const painted = row.querySelector("[name*='paintedArea']")?.value;
+            const areaCell = row.querySelector(".area");
+
+            let areaPerPiece = 0;
+
+            switch (painted) {
+                case "ONE_EDGE":
+                    areaPerPiece = width * thickness;
+                    break;
+                case "TWO_EDGES":
+                    areaPerPiece = 2 * width * thickness;
+                    break;
+                case "THREE_EDGES":
+                    areaPerPiece = 2 * width * thickness + length * thickness;
+                    break;
+                case "ONE_SIDE_NO_EDGES":
+                    areaPerPiece = length * width;
+                    break;
+                case "ONE_SIDE_WITH_EDGES":
+                    areaPerPiece = length * width + 2 * (length * thickness + width * thickness);
+                    break;
+                default: // ALL_SIDES
+                    areaPerPiece = length * width;
+            }
+
+            const totalRowArea = (areaPerPiece * amount) / 1_000_000;
+            areaCell.textContent = totalRowArea.toFixed(3);
+            totalArea += totalRowArea;
+        });
+
+        document.getElementById("totalArea").textContent = totalArea.toFixed(3);
+    }
+
+    function removeRow(button) {
+        const row = button.closest("tr");
+        row.remove();
+        calculateAll();
+    }
+</script>
 
 </body>
 </html>

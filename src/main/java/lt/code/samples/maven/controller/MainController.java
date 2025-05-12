@@ -1,6 +1,7 @@
 package lt.code.samples.maven.controller;
 
 import jakarta.servlet.http.HttpSession;
+import lt.code.samples.maven.dto.OrderFormDTO;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +18,12 @@ public class MainController {
     public String dashboard(Model model) {
         model.addAttribute("message", "Welcome to the Dashboard!");
         return "dashboard"; // this must match dashboard.html in templates
+    }
+
+    @GetMapping("/new")
+    public String showNewOrderForm(Model model) {
+        model.addAttribute("orderForm", new OrderFormDTO());
+        return "orders/new";
     }
 
 //    @GetMapping("/dashboard")
