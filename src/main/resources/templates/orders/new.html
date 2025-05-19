@@ -2,6 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>New Order</title>
+    <style>
+        .group-box {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
 
@@ -12,57 +19,79 @@
     <label>Order Name:</label><br>
     <input type="text" th:field="*{orderName}" required><br><br>
 
-    <label>Material:</label><br>
-    <input type="text" th:field="*{material}" required><br><br>
-
-    <label>Paint Color:</label><br>
-    <input type="text" th:field="*{paintColor}" required><br><br>
-
-    <table>
-        <thead>
-        <tr>
-            <th>Length (mm)</th>
-            <th>Width (mm)</th>
-            <th>Thickness (mm)</th>
-            <th>Amount</th>
-            <th>Painted Areas</th>
-            <th>Area (m²)</th>
-            <th>Action</th>
-        </tr>
-        </thead>
-        <tbody id="partsTableBody"></tbody>
-        <tfoot>
-        <tr>
-            <td colspan="5" style="text-align: right;"><strong>Total Area (m²):</strong></td>
-            <td id="totalArea">0.000</td>
-            <td></td>
-        </tr>
-        </tfoot>
-    </table>
-
-    <button type="button" onclick="addPartRow()">Add Part</button><br><br>
-
     <label>Description:</label><br>
-    <textarea th:field="*{description}" rows="5" cols="40"></textarea><br><br>
+    <textarea th:field="*{description}" rows="5" cols="50"></textarea><br><br>
 
+    <div id="groupsContainer"></div>
+
+    <div>
+        <strong>Total Order Area (m²):</strong> <span id="totalOrderArea">0.000</span>
+    </div>
+
+    <br>
+    <button type="button" onclick="addGroup()">Add Material & Color Group</button><br><br>
     <button type="submit">Create Order</button>
 </form>
 
-<br>
 <a th:href="@{/dashboard}">Back to Dashboard</a>
 
 <script>
-    function addPartRow() {
-        const table = document.getElementById("partsTableBody");
-        const index = table.rows.length;
-        const row = table.insertRow();
+    let groupIndex = 0;
+
+    function addGroup() {
+        const container = document.getElementById('groupsContainer');
+        const groupDiv = document.createElement('div');
+        groupDiv.classList.add('group-box');
+        const currentIndex = groupIndex;
+
+        groupDiv.innerHTML = `
+            <h3>Material & Paint Group</h3>
+            <label>Material:</label>
+            <input type="text" name="partGroups[${currentIndex}].material" required><br>
+            <label>Paint Color:</label>
+            <input type="text" name="partGroups[${currentIndex}].paintColor" required><br><br>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Length (mm)</th>
+                        <th>Width (mm)</th>
+                        <th>Thickness (mm)</th>
+                        <th>Amount</th>
+                        <th>Painted Areas</th>
+                        <th>Area (m²)</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="group-${currentIndex}-parts"></tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="5" style="text-align:right;"><strong>Group Area (m²):</strong></td>
+                        <td id="group-${currentIndex}-area">0.000</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <button type="button" onclick="addPartRow(${currentIndex})">Add Part</button>
+        `;
+
+        container.appendChild(groupDiv);
+        groupIndex++;
+    }
+
+    function addPartRow(groupIdx) {
+        const tbody = document.getElementById(`group-${groupIdx}-parts`);
+        const index = tbody.rows.length;
+        const row = tbody.insertRow();
+
         row.innerHTML = `
-            <td><input type="number" name="parts[${index}].length" class="length" required oninput="calculateAll()" /></td>
-            <td><input type="number" name="parts[${index}].width" class="width" required oninput="calculateAll()" /></td>
-            <td><input type="number" name="parts[${index}].thickness" required oninput="calculateAll()" /></td>
-            <td><input type="number" name="parts[${index}].amount" value="1" min="1" required oninput="calculateAll()" /></td>
+            <td><input type="number" name="partGroups[${groupIdx}].parts[${index}].length" class="length" required oninput="calculateAllAreas()" /></td>
+            <td><input type="number" name="partGroups[${groupIdx}].parts[${index}].width" class="width" required oninput="calculateAllAreas()" /></td>
+            <td><input type="number" name="partGroups[${groupIdx}].parts[${index}].thickness" class="thickness" required oninput="calculateAllAreas()" /></td>
+            <td><input type="number" name="partGroups[${groupIdx}].parts[${index}].amount" class="amount" value="1" min="1" required oninput="calculateAllAreas()" /></td>
             <td>
-                <select name="parts[${index}].paintedArea" onchange="calculateAll()">
+                <select name="partGroups[${groupIdx}].parts[${index}].paintedArea" class="painted" onchange="calculateAllAreas()">
                     <option value="ALL_SIDES">Visa detalė (default)</option>
                     <option value="ONE_EDGE">Viena briauna</option>
                     <option value="TWO_EDGES">Dvi briaunos</option>
@@ -72,60 +101,60 @@
                 </select>
             </td>
             <td class="area">0.000</td>
-            <td><button type="button" onclick="removeRow(this)">Remove</button></td>
+            <td><button type="button" onclick="removeRow(this); calculateAllAreas()">Remove</button></td>
         `;
     }
 
-    function calculateAll() {
-        const rows = document.querySelectorAll("#partsTableBody tr");
-        let totalArea = 0;
+    function calculateAllAreas() {
+        let totalOrderArea = 0;
 
-        rows.forEach(row => {
-            const length = parseFloat(row.querySelector(".length")?.value) || 0;
-            const width = parseFloat(row.querySelector(".width")?.value) || 0;
-            const thickness = parseFloat(row.querySelector("[name*='thickness']")?.value) || 0;
-            const amount = parseInt(row.querySelector("[name*='amount']")?.value) || 1;
-            const painted = row.querySelector("[name*='paintedArea']")?.value;
-            const areaCell = row.querySelector(".area");
+        for (let g = 0; g < groupIndex; g++) {
+            const rows = document.querySelectorAll(`#group-${g}-parts tr`);
+            let groupArea = 0;
 
-            let areaPerPiece = 0;
+            rows.forEach(row => {
+                const length = parseFloat(row.querySelector(".length")?.value) || 0;
+                const width = parseFloat(row.querySelector(".width")?.value) || 0;
+                const thickness = parseFloat(row.querySelector(".thickness")?.value) || 0;
+                const amount = parseInt(row.querySelector(".amount")?.value) || 1;
+                const painted = row.querySelector(".painted")?.value;
+                const areaCell = row.querySelector(".area");
 
-            switch (painted) {
-                case "ONE_EDGE":
-                    areaPerPiece = length * thickness;
-                    break;
-                case "TWO_EDGES":
-                    areaPerPiece = 2 * length * thickness;
-                    break;
-                case "THREE_EDGES":
-                    areaPerPiece = 2 * length * thickness + width * thickness;
-                    break;
-                case "ONE_SIDE_NO_EDGES":
-                    areaPerPiece = length * width;
-                    break;
-                case "ONE_SIDE_WITH_EDGES":
-                    areaPerPiece = length * width + 2 * (length * thickness + width * thickness);
-                    break;
-                case "ALL_SIDES":
-                default:
+                let areaPerPiece = 0;
+                switch (painted) {
+                    case "ONE_EDGE":
+                        areaPerPiece = width * thickness;
+                        break;
+                    case "TWO_EDGES":
+                        areaPerPiece = 2 * width * thickness;
+                        break;
+                    case "THREE_EDGES":
+                        areaPerPiece = 2 * width * thickness + length * thickness;
+                        break;
+                    case "ONE_SIDE_NO_EDGES":
+                        areaPerPiece = length * width;
+                        break;
+                    case "ONE_SIDE_WITH_EDGES":
+                        areaPerPiece = length * width + 2 * (length * thickness + width * thickness);
+                        break;
+                    default: // ALL_SIDES
+                        areaPerPiece = 2 * (length * width + length * thickness + width * thickness);
+                }
 
-                    areaPerPiece = 2 * (length * width) + 2 * (length * thickness) + 2 * (width * thickness);
-                    break;
-            }
+                const totalRowArea = (areaPerPiece * amount) / 1_000_000;
+                areaCell.textContent = totalRowArea.toFixed(3);
+                groupArea += totalRowArea;
+            });
 
-            const totalRowArea = (areaPerPiece * amount) / 1_000_000;
-            areaCell.textContent = totalRowArea.toFixed(3);
-            totalArea += totalRowArea;
-        });
+            document.getElementById(`group-${g}-area`).textContent = groupArea.toFixed(3);
+            totalOrderArea += groupArea;
+        }
 
-        document.getElementById("totalArea").textContent = totalArea.toFixed(3);
+        document.getElementById("totalOrderArea").textContent = totalOrderArea.toFixed(3);
     }
 
-
     function removeRow(button) {
-        const row = button.closest("tr");
-        row.remove();
-        calculateAll();
+        button.closest('tr').remove();
     }
 </script>
 

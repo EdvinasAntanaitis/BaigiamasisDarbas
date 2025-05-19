@@ -1,38 +1,39 @@
 package lt.code.samples.maven.controller;
 
-import jakarta.servlet.http.HttpSession;
+import lt.code.samples.maven.dto.MaterialGroupDTO;
 import lt.code.samples.maven.dto.OrderFormDTO;
+import lt.code.samples.maven.dto.PartDTO;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
 public class MainController {
 
     @GetMapping("/")
     public String home() {
-        return "redirect:/dashboard"; // or "home" if you have a home.html template
+        return "redirect:/dashboard";
     }
 
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         model.addAttribute("message", "Welcome to the Dashboard!");
-        return "dashboard"; // this must match dashboard.html in templates
+        return "dashboard";
     }
 
-    @GetMapping("/new")
+    @GetMapping("/orders/new")
     public String showNewOrderForm(Model model) {
-        model.addAttribute("orderForm", new OrderFormDTO());
+        OrderFormDTO form = new OrderFormDTO();
+
+        MaterialGroupDTO group = new MaterialGroupDTO();
+        group.getParts().add(new PartDTO());
+
+        form.getPartGroups().add(group);
+
+        model.addAttribute("orderForm", form);
         return "orders/new";
     }
-
-//    @GetMapping("/dashboard")
-//    public String dashboard(HttpSession session, Model model) {
-//        if (!SessionUtils.isLoggedIn(session)) {
-//           return "redirect:/login";
-//       }
-//
-//        model.addAttribute("user", session.getAttribute("user"));
-//        return "dashboard";
-//    }
 }
+
