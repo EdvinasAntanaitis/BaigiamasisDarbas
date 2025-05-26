@@ -6,6 +6,8 @@ import lt.code.samples.maven.dto.PartGroupDTO;
 import lt.code.samples.maven.order.Order;
 import lt.code.samples.maven.order.Part;
 import lt.code.samples.maven.order.PartGroup;
+import lt.code.samples.maven.repository.OrderRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,15 +23,16 @@ import java.util.List;
 @RequestMapping("/orders")
 public class OrderController {
 
+    @Autowired
+    private OrderRepository orderRepository;
+
     @PostMapping("/new")
     public String submitOrder(@ModelAttribute OrderFormDTO orderForm,
                               RedirectAttributes redirectAttributes) {
 
         System.out.println("Gautas užsakymas: " + orderForm.getOrderName());
-        System.out.println("Grupių skaičius: " + orderForm.getPartGroups().size());
-
         Order orderEntity = convertDtoToEntity(orderForm);
-
+        orderRepository.save(orderEntity);
         redirectAttributes.addFlashAttribute("successMessage", "Užsakymas sukurtas sėkmingai!");
         return "redirect:/dashboard";
     }
@@ -37,7 +40,6 @@ public class OrderController {
     private Order convertDtoToEntity(OrderFormDTO dto) {
         Order order = new Order();
         order.setOrderName(dto.getOrderName());
-        order.setDescription(dto.getDescription());
 
         List<PartGroup> groupEntities = new ArrayList<>();
         for (PartGroupDTO groupDTO : dto.getPartGroups()) {
@@ -70,8 +72,11 @@ public class OrderController {
         model.addAttribute("orderForm", new OrderFormDTO());
         return "orders/new";
     }
+
+    //naujai sukurta
     @PostMapping("/orders/new")
-    public String submitOrder(@ModelAttribute OrderFormDTO orderForm) {
-        return "redirect:/dashboard";
+    public String submitNewOrder(@ModelAttribute OrderFormDTO orderForm,
+                                 RedirectAttributes redirectAttributes) {
+        return "redirect:/orders/new";
     }
 }

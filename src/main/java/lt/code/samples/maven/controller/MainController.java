@@ -3,11 +3,14 @@ package lt.code.samples.maven.controller;
 import lt.code.samples.maven.dto.MaterialGroupDTO;
 import lt.code.samples.maven.dto.OrderFormDTO;
 import lt.code.samples.maven.dto.PartDTO;
+import lt.code.samples.maven.order.Order;
+import lt.code.samples.maven.repository.OrderRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
+
+import java.util.List;
 
 @Controller
 public class MainController {
@@ -35,5 +38,16 @@ public class MainController {
         model.addAttribute("orderForm", form);
         return "orders/new";
     }
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @GetMapping("/orders")
+    public String showOrderList(Model model) {
+        List<Order> orders = orderRepository.findAll();
+        model.addAttribute("orders", orders);
+        return "orders/list";
+    }
+
 }
 

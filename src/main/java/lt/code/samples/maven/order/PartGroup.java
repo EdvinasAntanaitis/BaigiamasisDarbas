@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -22,5 +23,5 @@ public class PartGroup {
     private Order order;
 
     @OneToMany(mappedBy = "partGroup", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Part> parts;
+    private List<Part> parts = new ArrayList<>();
 }
