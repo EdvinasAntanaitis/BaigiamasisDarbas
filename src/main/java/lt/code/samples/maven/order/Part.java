@@ -2,7 +2,7 @@ package lt.code.samples.maven.order;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lt.code.samples.maven.order.PaintedArea;
+
 
 @Entity
 @Data

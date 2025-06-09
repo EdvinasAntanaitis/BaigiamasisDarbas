@@ -1,19 +1,15 @@
 package lt.code.samples.maven.worker;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.Data;
 import lt.code.samples.maven.order.Order;
-import org.springframework.data.annotation.Id;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Data
 public class WorkLog {
-    @jakarta.persistence.Id
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,13 +19,6 @@ public class WorkLog {
     private LocalDateTime endTime;
 
     @ManyToOne
+    @JoinColumn(name = "order_id")
     private Order order;
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getId() {
-        return id;
-    }
 }
