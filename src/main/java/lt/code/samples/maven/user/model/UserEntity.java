@@ -2,8 +2,9 @@ package lt.code.samples.maven.user.model;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
+
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -31,6 +32,9 @@ public class UserEntity implements UserDetails {
     private String password;
     private String phoneNumber;
 
+    @Column(nullable = false)
+    private boolean enabled = true; // ✅ ČIA! 👈
+
     @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     @JoinTable(
             name = "users_authorities",
@@ -41,31 +45,28 @@ public class UserEntity implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
-    }
-
-    @Override
-    public String getUsername() {
-        return username;
+        return authorities.stream()
+                .map(a-> new SimpleGrantedAuthority(a.getName()))
+                .collect(Collectors.toList());
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return UserDetails.super.isAccountNonExpired();
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return UserDetails.super.isAccountNonLocked();
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return UserDetails.super.isCredentialsNonExpired();
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return UserDetails.super.isEnabled();
+        return enabled;
     }
 }

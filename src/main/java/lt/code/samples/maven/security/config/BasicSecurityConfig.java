@@ -32,17 +32,39 @@ public class BasicSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .authorizeHttpRequests(authorizeRequests ->
-                        authorizeRequests.requestMatchers("/login/**").permitAll()
-                                .anyRequest()
-                                .authenticated())
-                .formLogin(formLogin ->
-                        formLogin
-                                .loginPage("/login")
-                                .defaultSuccessUrl("/dashboard", true)
-                                .permitAll()
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers("/login/**").permitAll()
+                        .requestMatchers("/orders/new").hasRole("ADMIN")
+                        .requestMatchers("/user/profilemanagement").hasRole("ADMIN")
+                        .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/dashboard", true)
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .permitAll()
                 )
                 .build();
+
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
@@ -72,17 +94,4 @@ public class BasicSecurityConfig {
         return users;
     }
 
-    @Bean
-    public AuthenticationProvider authenticationProvider() {
-        var daoAuthenticationProvider = new DaoAuthenticationProvider();
-        daoAuthenticationProvider.setUserDetailsService(userService);
-        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
-
-        return daoAuthenticationProvider;
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 }

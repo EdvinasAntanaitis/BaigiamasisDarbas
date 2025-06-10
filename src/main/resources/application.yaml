@@ -2,6 +2,7 @@ spring:
 
 logging:
   level:
+    org.springframework.security: DEBUG
     lt:
       code:
         samples:

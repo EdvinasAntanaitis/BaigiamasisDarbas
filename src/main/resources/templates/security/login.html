@@ -13,7 +13,8 @@
             <div class="card shadow">
                 <div class="card-body">
                     <h3 class="card-title text-center mb-4">Login</h3>
-                    <form action="/login" method="post">
+                    <form th:action="@{/login}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <div class="mb-3">
                             <label for="username" class="form-label">Username</label>
                             <input type="text" name="username" id="username" class="form-control" required>
@@ -27,7 +28,6 @@
                         </div>
                     </form>
                     <div class="mt-3 text-center">
-                        <a href="#">Forgot password?</a>
                     </div>
                 </div>
             </div>

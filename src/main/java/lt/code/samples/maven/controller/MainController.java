@@ -48,6 +48,15 @@ public class MainController {
         model.addAttribute("orders", orders);
         return "orders/list";
     }
+    @Controller
+    public class LoginController {
+
+        @GetMapping("/login")
+        public String loginPage() {
+            return "security/login";
+        }
+    }
+
 
 }
 
