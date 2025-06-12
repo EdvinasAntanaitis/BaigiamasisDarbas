@@ -8,26 +8,53 @@
 </head>
 <body>
 <div class="container mt-5">
-    <h1>Profilio Valdymas</h1>
-    <p>Čia gali koreguoti darbuotojų profilius (matoma tik administratoriui).</p>
+    <h1>Profile Management</h1>
 
     <div sec:authorize="hasRole('ADMIN')">
         <div class="mb-3">
-            <a th:href="@{/profile/new}" class="btn btn-success">Sukurti Naują Profilį</a>
-        </div>
-        <div class="mb-3">
-            <a th:href="@{/profile/list}" class="btn btn-primary">Peržiūrėti Visus Profilius</a>
-        </div>
-        <div class="mb-3">
-            <a th:href="@{/profile/edit}" class="btn btn-warning">Koreguoti Esamą Profilį</a>
-        </div>
-        <div class="mb-3">
-            <a th:href="@{/profile/delete}" class="btn btn-danger">Ištrinti Profilį</a>
+            <a th:href="@{/user/newuser}" class="btn btn-success">New Profile</a>
         </div>
     </div>
 
-    <form th:action="@{/logout}" method="post" class="mt-3">
-        <button type="submit" class="btn btn-secondary">Atsijungti</button>
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+    <table class="table table-striped mt-4">
+        <thead>
+        <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Name</th>
+            <th>Surname</th>
+            <th>Phone</th>
+            <th>Roles</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="user : ${users}">
+            <td th:text="${user.username}">username</td>
+            <td th:text="${user.email}">email@example.com</td>
+            <td th:text="${user.firstName}">Name</td>
+            <td th:text="${user.lastName}">Surname</td>
+            <td th:text="${user.phoneNumber}">123456789</td>
+            <td>
+        <span th:each="role : ${user.authorities}"
+              th:text="${role.name}"
+              class="badge bg-secondary me-1"></span>
+            </td>
+            <td>
+                <a th:href="@{'/user/edit/' + ${user.id}}" class="btn btn-sm btn-primary">Edit</a>
+                <form th:action="@{/user/delete/{id}(id=${user.id})}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+
+    </table>
+    <a th:href="@{/dashboard}" class="btn btn-primary mt-4">Back to Dashboard</a>
+    <form th:action="@{/logout}" method="post" class="mt-4">
+        <button type="submit" class="btn btn-secondary">Logout</button>
     </form>
 </div>
 </body>

@@ -1,23 +1,20 @@
 package lt.code.samples.maven.user.model;
 
-import java.util.Collection;
-import java.util.HashSet;
-
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "users")
+@Entity
 @Table(name = "users")
 public class UserEntity implements UserDetails {
 
@@ -27,27 +24,35 @@ public class UserEntity implements UserDetails {
 
     private String firstName;
     private String lastName;
+
+    @Column(nullable = false, unique = true)
     private String username;
+
+    @Column(nullable = false, unique = true)
     private String email;
-    private String password;
-    private String phoneNumber;
 
     @Column(nullable = false)
-    private boolean enabled = true; // ✅ ČIA! 👈
+    private String password;
 
+    private String phoneNumber;
+
+    @Builder.Default
     @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     @JoinTable(
             name = "users_authorities",
-            joinColumns = { @JoinColumn(name = "user_id") },
-            inverseJoinColumns = { @JoinColumn(name = "authority_id") }
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "authority_id")
     )
     private Set<AuthorityEntity> authorities = new HashSet<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities.stream()
-                .map(a-> new SimpleGrantedAuthority(a.getName()))
-                .collect(Collectors.toList());
+        return authorities;
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
     }
 
     @Override
@@ -67,6 +72,6 @@ public class UserEntity implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return enabled;
+        return true;
     }
 }

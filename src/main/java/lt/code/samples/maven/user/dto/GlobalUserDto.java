@@ -1,4 +1,4 @@
-package lt.code.samples.maven.dto;
+package lt.code.samples.maven.user.dto;
 
 import java.util.StringJoiner;
 

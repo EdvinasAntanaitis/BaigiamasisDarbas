@@ -28,7 +28,6 @@ public class BasicSecurityConfig {
     private final UserService userService;
     private final ApplicationUsersPropertyConfig applicationUsersPropertyConfig;
 
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
@@ -36,10 +35,13 @@ public class BasicSecurityConfig {
                         .requestMatchers("/login/**").permitAll()
                         .requestMatchers("/orders/new").hasRole("ADMIN")
                         .requestMatchers("/user/profilemanagement").hasRole("ADMIN")
+                        .requestMatchers("/user/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
+                        .usernameParameter("username")
+                        .passwordParameter("password")
                         .defaultSuccessUrl("/dashboard", true)
                         .permitAll()
                 )
@@ -51,7 +53,6 @@ public class BasicSecurityConfig {
                         .permitAll()
                 )
                 .build();
-
     }
 
     @Bean
@@ -74,7 +75,6 @@ public class BasicSecurityConfig {
                 applicationUsersPropertyConfig.getUsers().stream()
                         .map(user -> {
                             log.info("Creating global user: {}", user);
-
                             return User.withUsername(user.username())
                                     .password(user.password())
                                     .roles(user.roles())
@@ -89,9 +89,6 @@ public class BasicSecurityConfig {
         var users = new JdbcUserDetailsManager(datasource);
         users.setUsersByUsernameQuery("SELECT username, password, TRUE AS enabled FROM users WHERE username = ?");
         users.setAuthoritiesByUsernameQuery("SELECT username, 'ROLE_ADMIN' AS authority FROM users WHERE username = ?");
-
-
         return users;
     }
-
 }
