@@ -262,4 +262,12 @@ public class OrderController {
         redirectAttributes.addFlashAttribute("message", "Fault has been marked as fixed.");
         return "redirect:/orders/worklog?orderName=" + log.getOrder().getOrderName();
     }
+
+    @GetMapping("/orders/list")
+    public String listOrders(Model model) {
+        List<Order> orders = orderRepository.findAll();
+        model.addAttribute("orders", orders);
+        return "orders/list";
+    }
+
 }

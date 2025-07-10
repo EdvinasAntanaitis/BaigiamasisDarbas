@@ -37,6 +37,14 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<WorkLogEntity> workLogs;
 
+
+    public boolean hasUnfixedFaults() {
+        return workLogs != null && workLogs.stream()
+                .anyMatch(log -> log.isFaulty() && !log.isFaultFixed());
+    }
+
+
+
     @PrePersist
     public void prePersist() {
         if (creationDate == null) {

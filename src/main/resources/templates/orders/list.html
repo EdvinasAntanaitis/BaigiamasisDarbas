@@ -36,9 +36,11 @@
             <td th:text="${order.creationDate != null ? #temporals.format(order.creationDate, 'yyyy-MM-dd HH:mm') : '---'}"></td>
 
             <td>
-                <span th:if="${order.completed}" class="badge bg-success">Completed</span>
-                <span th:unless="${order.completed}" class="badge bg-secondary">In Progress</span>
+                <span th:if="${order.hasUnfixedFaults()}" class="badge bg-danger">Faulty</span>
+                <span th:if="${!order.hasUnfixedFaults()} and ${order.completed == true}" class="badge bg-success">Completed</span>
+                <span th:if="${!order.hasUnfixedFaults()} and ${order.completed == false}" class="badge bg-secondary">In Progress</span>
             </td>
+
 
             <td>
                 <a th:href="@{/orders/{id}(id=${order.id})}" class="btn btn-sm btn-info">Peržiūrėti</a>
