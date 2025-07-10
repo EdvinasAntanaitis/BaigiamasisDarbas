@@ -21,6 +21,10 @@
         <a th:href="@{/orders}" class="btn btn-secondary">View Order List</a>
     </div>
 
+    <div class="mb-2">
+        <a th:href="@{/orders/worklog}" class="btn btn-success">View Work Log</a>
+    </div>
+
     <div sec:authorize="hasRole('ROLE_ADMIN')" class="mb-2">
         <a th:href="@{/user/profilemanagement}" class="btn btn-warning">Profile Management</a>
     </div>

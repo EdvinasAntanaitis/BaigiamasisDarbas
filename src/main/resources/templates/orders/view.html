@@ -15,6 +15,10 @@
     <ul class="list-group mb-4">
         <li class="list-group-item" th:each="group : ${order.partGroups}">
             <strong>Grupė:</strong> <span th:text="${group.material}"/> - <span th:text="${group.paintColor}"/>
+            <br>
+            <strong>Grupės kvadratūra:</strong>
+            <span th:text="${#numbers.formatDecimal(areaPerGroup[group.material + '-' + group.paintColor], 0, 2) + ' m²'}"></span>
+
             <ul class="ms-3 mt-2">
                 <li th:each="part : ${group.parts}">
                     Detalė: <span th:text="${part.length}"/> x <span th:text="${part.width}"/>
@@ -24,13 +28,23 @@
     </ul>
 
     <h2>Darbo logai</h2>
-    <ul class="list-group mb-4">
-        <li class="list-group-item" th:each="log : ${order.workLogs}">
-            <span th:text="${log.description}"/>
-        </li>
-    </ul>
 
-    <a th:href="@{/orders}" class="btn btn-primary">Back to List</a>
+    <div th:each="log : ${order.workLogs}">
+        <div class="card mb-3">
+            <div class="card-body">
+                <p><strong>Pradžios laikas:</strong> <span th:text="${log.startTime}">00:00</span></p>
+                <p><strong>Pabaigos laikas:</strong> <span th:text="${log.endTime}">00:00</span></p>
+                <p><strong>Darbuotojas:</strong> <span th:text="${log.workerName}">Vardas</span></p>
+
+                <div th:if="${log.faulty}">
+                    <span class="badge bg-danger mt-2">Brokuota</span>
+                    <p><strong>Operacija:</strong> <span th:text="${log.operationName}">nenurodyta</span></p>
+                    <p><strong>Aprašymas:</strong> <span th:text="${log.faultDescription}">nenurodyta</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 </body>
 </html>

@@ -44,4 +44,22 @@ CREATE TABLE IF NOT EXISTS authorities (
                              CONSTRAINT fk_authorities_users FOREIGN KEY(username) REFERENCES users(username)
 );
 
+CREATE TABLE work_log_entity (
+                                 id SERIAL PRIMARY KEY,
+                                 worker_name VARCHAR(255),
+                                 start_time TIMESTAMP,
+                                 end_time TIMESTAMP,
+                                 operation_name VARCHAR(255),
+                                 paint_type VARCHAR(255),
+                                 faulty BOOLEAN,
+                                 order_id BIGINT,
+                                 CONSTRAINT fk_order FOREIGN KEY (order_id) REFERENCES orders(id)
+);
+
 CREATE UNIQUE INDEX ix_auth_username ON authorities (username, authority);
+
+ALTER TABLE orders ADD COLUMN completed BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE work_log_entity ADD COLUMN fault_fixed BOOLEAN NOT NULL DEFAULT FALSE;
+
+

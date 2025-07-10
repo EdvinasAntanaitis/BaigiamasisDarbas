@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Redaguoti darbo įrašą</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+</head>
+<body>
+<div class="container mt-5">
+    <h2>Redaguoti darbo įrašą</h2>
+    <div th:if="${message}" class="alert alert-success" role="alert">
+        <span th:text="${message}"></span>
+    </div>
+    <div th:if="${error}" class="alert alert-danger" role="alert">
+        <span th:text="${error}"></span>
+    </div>
+    <form th:action="@{'/orders/worklog/edit/' + ${log.id}}" method="post">
+        <div class="form-group">
+            <label for="workerName">Darbuotojo vardas:</label>
+            <input type="text" class="form-control" id="workerName" name="workerName"
+                   th:value="${log.workerName}" required>
+        </div>
+        <div class="form-group">
+            <label for="startTime">Pradžios laikas:</label>
+            <input type="datetime-local" class="form-control" id="startTime" name="startTime"
+                   th:value="${#temporals.format(log.startTime, 'yyyy-MM-dd\'T\'HH:mm')}" required>
+        </div>
+        <div class="form-group">
+            <label for="endTime">Pabaigos laikas:</label>
+            <input type="datetime-local" class="form-control" id="endTime" name="endTime"
+                   th:value="${log.endTime != null ? #temporals.format(log.endTime, 'yyyy-MM-dd\'T\'HH:mm') : ''}">
+        </div>
+        <button type="submit" class="btn btn-primary">Išsaugoti</button>
+        <a th:href="@{/dashboard}" class="btn btn-secondary">Atšaukti</a>
+    </form>
+</div>
+</body>
+</html>

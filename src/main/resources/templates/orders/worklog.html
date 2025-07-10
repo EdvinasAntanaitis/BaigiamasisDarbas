@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Work Log</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+
+    <div th:if="${message}" class="alert alert-success" role="alert" th:text="${message}"></div>
+    <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+
+    <h2 class="mb-4">Work Start / End</h2>
+
+    <form th:action="@{/orders/worklog/search}" method="get" class="mb-3">
+        <label for="orderId">Search order by ID:</label>
+        <input type="number" id="orderId" name="orderId" required>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    <p><strong>Logged in user:</strong>
+        <span th:text="${#authentication?.principal?.firstName + ' ' + #authentication?.principal?.lastName}">User name</span>
+    </p>
+
+    <div th:if="${order != null}">
+        <h4 th:text="'Order: ' + ${order.orderName}"></h4>
+        <p><strong>Description:</strong> <span th:text="${order.description}"></span></p>
+        <p><strong>Paint Type:</strong>
+            <span th:text="${!order.partGroups.isEmpty()} ? ${order.partGroups[0].paintColor} : 'Not specified'">Not specified</span>
+        </p>
+
+        <h3 class="mt-4">Performed operations / Ongoing tasks</h3>
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>Worker</th>
+                <th>Date and Time</th>
+                <th>Operation</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="log : ${order.workLogs}">
+                <td th:text="${log.workerName}">Worker Name</td>
+                <td>
+                    <span th:text="${#temporals.format(log.startTime, 'yyyy-MM-dd HH:mm')}"></span> -
+                    <span th:if="${log.endTime != null}" th:text="${#temporals.format(log.endTime, 'yyyy-MM-dd HH:mm')}"></span>
+                    <span th:unless="${log.endTime != null}">...</span>
+                </td>
+                <td th:text="${log.operationName}">Operation</td>
+
+                <td>
+                    <button type="button"
+                            class="btn btn-danger btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#faultModal"
+                            th:attr="data-worklog-id=${log.id}"
+                            onclick="setWorkLogId(this)"
+                            th:if="${log.endTime == null and !log.faulty}">
+                        Mark as Faulty
+                    </button>
+
+                    <form th:if="${log.faulty and !log.faultFixed}" method="post"
+                          th:action="@{/orders/worklog/fix/{id}(id=${log.id})}"
+                          style="display:inline">
+                        <button type="submit" class="btn btn-secondary btn-sm">Fix Fault</button>
+                    </form>
+
+                    <div th:if="${log.faulty and log.faultFixed}" class="badge bg-info text-dark mt-1">
+                        Fault fixed
+                    </div>
+
+                <form th:if="${log.endTime == null}"
+                      th:unless="${log.faulty and !log.faultFixed}"
+                      th:action="@{/orders/worklog/end}" method="post" style="display:inline;">
+                    <input type="hidden" name="workLogId" th:value="${log.id}" />
+                    <button type="submit" class="btn btn-warning btn-sm">End</button>
+                </form>
+            </td>
+
+            </tbody>
+        </table>
+
+        <div class="mt-4 d-flex gap-3">
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#startWorkModal">
+                Start Work
+            </button>
+        </div>
+
+        <form th:action="@{/orders/end}" method="post" th:if="${order != null}">
+            <input type="hidden" name="orderId" th:value="${order.id}" />
+            <button class="btn btn-success mt-3">End Order</button>
+        </form>
+
+        <div class="mt-5">
+            <h5>Order Description</h5>
+            <textarea class="form-control" rows="3" disabled th:text="${order.description}"></textarea>
+        </div>
+    </div>
+
+    <a class="btn btn-primary mt-3" th:href="@{/dashboard}">Back to Dashboard</a>
+</div>
+
+<div class="modal fade" id="startWorkModal" tabindex="-1" aria-labelledby="startWorkLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" th:action="@{/orders/worklog/start}">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="startWorkLabel">Select Operation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="orderId" th:value="${order?.id}" />
+                    <select name="operation" class="form-select" required>
+                        <option value="">-- Choose operation --</option>
+                        <option value="Sanding">Sanding</option>
+                        <option value="Priming">Priming</option>
+                        <option value="Painting">Painting</option>
+                        <option value="Lacquering">Lacquering</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Start</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="faultModal" tabindex="-1" aria-labelledby="faultModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form th:action="@{/orders/worklog/fault}" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="faultModalLabel">Mark as Faulty</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="faultWorkLogId" name="workLogId"/>
+
+                    <div class="mb-2">
+                        <label>Operation Name:</label>
+                        <input type="text" id="faultOperationName" name="operationName" class="form-control" required />
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Fault Description:</label>
+                        <textarea id="faultDescription" name="faultDescription" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger">Confirm Fault</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function setWorkLogId(button) {
+        const workLogId = button.getAttribute("data-worklog-id");
+        const operationName = button.getAttribute("data-operation-name");
+        const faultDescription = button.getAttribute("data-fault-description");
+
+        document.getElementById("faultWorkLogId").value = workLogId;
+        document.getElementById("faultOperationName").value = operationName;
+        document.getElementById("faultDescription").value = faultDescription || '';
+    }
+</script>
+</body>
+</html>
