@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lt.code.samples.maven.user.dto.UserSignUpDto;
 import lt.code.samples.maven.user.service.UserRegistrationService;
+import lt.code.samples.maven.user.service.UserService;
 import lt.code.samples.maven.user.validator.UserSignupValidator;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,6 +23,7 @@ public class UserProfileController {
 
     private final UserSignupValidator userSignupValidator;
     private final UserRegistrationService userRegistrationService;
+    private final UserService userService;
 
     @GetMapping("/profilemanagement")
     public String profileManagement(Model model) {
@@ -60,4 +62,20 @@ public class UserProfileController {
         redirectAttributes.addFlashAttribute("message", "User deleted successfully.");
         return "redirect:/user/profilemanagement";
     }
+
+    @PostMapping("/edit")
+    public String editUser(@RequestParam Long   id,
+                           @RequestParam String firstName,
+                           @RequestParam String lastName,
+                           @RequestParam String email,
+                           @RequestParam(required = false) String password,
+                           @RequestParam String role,
+                           RedirectAttributes redirectAttributes) {
+
+        userService.updateUser(id, firstName, lastName, email, password, role);
+        redirectAttributes.addFlashAttribute("message", "User updated.");
+        return "redirect:/user/profilemanagement";
+    }
+
+
 }

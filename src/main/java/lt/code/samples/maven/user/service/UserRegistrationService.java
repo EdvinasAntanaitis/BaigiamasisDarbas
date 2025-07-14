@@ -44,6 +44,27 @@ public class UserRegistrationService {
     public void deleteUserById(Long id) {
         userRepository.deleteById(id);
     }
+
+    public void updateUser(Long id, String firstName, String lastName, String email, String password, String role) {
+        UserEntity user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setEmail(email);
+
+        if (password != null && !password.isBlank()) {
+            user.setPassword(passwordEncoder.encode(password)); // Įsitikink, kad turi passwordEncoder!
+        }
+
+        // Role keitimas (paprastas variantas)
+        user.getAuthorities().clear();
+        AuthorityEntity authority = authorityRepository.findByName("ROLE_" + role)
+                .orElseThrow(() -> new RuntimeException("Role not found: " + role));
+        user.getAuthorities().add(authority);
+
+        userRepository.save(user);
+    }
+
 }
 
 

@@ -46,7 +46,7 @@ public class UserEntity implements UserDetails {
     private Set<AuthorityEntity> authorities = new HashSet<>();
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
+    public Set<AuthorityEntity> getAuthorities() {
         return authorities;
     }
 
@@ -74,4 +74,18 @@ public class UserEntity implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
+    public void setRole(AuthorityEntity newRole) {
+        this.authorities.clear();
+        this.authorities.add(newRole);
+    }
+
+    /** Jei kada prireiktų greitai gauti vieną (pirmą) rolę kaip String. */
+    public String getRole() {
+        return authorities.stream()
+                .findFirst()
+                .map(AuthorityEntity::getName)
+                .orElse(null);
+    }
 }
+
