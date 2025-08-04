@@ -66,10 +66,6 @@
                                 </div>
                                 <div class="modal-body row g-3">
                                     <div class="col-md-6">
-                                        <label class="form-label">Username</label>
-                                        <input type="text" name="username" class="form-control" th:value="${user.username}" required />
-                                    </div>
-                                    <div class="col-md-6">
                                         <label class="form-label">Email</label>
                                         <input type="email" name="email" class="form-control" th:value="${user.email}" required />
                                     </div>
@@ -88,9 +84,12 @@
                                     <div class="col-md-6">
                                         <label class="form-label">Role</label>
                                         <select name="role" class="form-select">
-                                            <option value="USER" th:selected="${#lists.contains(user.authorities, 'USER')}">USER</option>
-                                            <option value="ADMIN" th:selected="${#lists.contains(user.authorities, 'ADMIN')}">ADMIN</option>
+                                            <option value="ROLE_USER" th:selected="${user.role == 'ROLE_WORKER'}">WORKER</option>
+                                            <option value="ROLE_ADMIN" th:selected="${user.role == 'ROLE_ADMIN'}">ADMIN</option>
+                                            <option value="ROLE_CLIENT" th:selected="${user.role == 'ROLE_CLIENT'}">CLIENT</option>
                                         </select>
+
+
                                     </div>
                                     <div class="col-md-12">
                                         <label class="form-label">New Password (leave blank to keep current)</label>

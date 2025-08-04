@@ -3,9 +3,14 @@ package lt.code.samples.maven.user.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lt.code.samples.maven.user.dto.UserSignUpDto;
+import lt.code.samples.maven.user.model.AuthorityEntity;
+import lt.code.samples.maven.user.model.UserEntity;
+import lt.code.samples.maven.user.repository.AuthorityRepository;
+import lt.code.samples.maven.user.repository.UserRepository;
 import lt.code.samples.maven.user.service.UserRegistrationService;
 import lt.code.samples.maven.user.service.UserService;
 import lt.code.samples.maven.user.validator.UserSignupValidator;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -23,7 +28,11 @@ public class UserProfileController {
 
     private final UserSignupValidator userSignupValidator;
     private final UserRegistrationService userRegistrationService;
+    private final UserRepository userRepository;
+    private final AuthorityRepository authorityRepository;
+    private final PasswordEncoder passwordEncoder;
     private final UserService userService;
+
 
     @GetMapping("/profilemanagement")
     public String profileManagement(Model model) {
@@ -58,24 +67,48 @@ public class UserProfileController {
 
     @PostMapping("/delete/{id}")
     public String deleteUser(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
-        userRegistrationService.deleteUserById(id);
+        userService.deleteUserById(id);
         redirectAttributes.addFlashAttribute("message", "User deleted successfully.");
         return "redirect:/user/profilemanagement";
     }
 
     @PostMapping("/edit")
-    public String editUser(@RequestParam Long   id,
-                           @RequestParam String firstName,
-                           @RequestParam String lastName,
-                           @RequestParam String email,
-                           @RequestParam(required = false) String password,
-                           @RequestParam String role,
-                           RedirectAttributes redirectAttributes) {
+    public String updateUser(@RequestParam Long id,
+                             @RequestParam String email,
+                             @RequestParam String firstName,
+                             @RequestParam String lastName,
+                             @RequestParam String phoneNumber,
+                             @RequestParam String role,
+                             @RequestParam(required = false) String password) {
 
-        userService.updateUser(id, firstName, lastName, email, password, role);
-        redirectAttributes.addFlashAttribute("message", "User updated.");
+        UserEntity user = userRepository.findById(id).orElseThrow();
+
+        user.setEmail(email);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setPhoneNumber(phoneNumber);
+
+        if (password != null && !password.isBlank()) {
+            user.setPassword(passwordEncoder.encode(password));
+        }
+
+        user.getAuthorities().clear();
+
+        AuthorityEntity authority = authorityRepository.findByName(role.toUpperCase())
+                .orElseGet(() -> {
+                    AuthorityEntity newAuthority = new AuthorityEntity();
+                    newAuthority.setName("ROLE_" + role.toUpperCase());
+                    return authorityRepository.save(newAuthority);
+                });
+
+        user.getAuthorities().add(authority);
+
+        userRepository.save(user);
+
         return "redirect:/user/profilemanagement";
     }
+
+
 
 
 }

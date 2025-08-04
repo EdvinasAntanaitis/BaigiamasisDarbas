@@ -2,7 +2,8 @@ package lt.code.samples.maven.security.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import lt.code.samples.maven.security.service.UserDetailsServiceImpl;
+
+import lt.code.samples.maven.user.service.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -60,29 +61,5 @@ public class BasicSecurityConfig {
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder);
         return authProvider;
-    }
-
-    @Bean
-    public UserDetailsService inMemoryUserDetailsService() {
-        final PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        return new InMemoryUserDetailsManager(
-                applicationUsersPropertyConfig.getUsers().stream()
-                        .map(user -> {
-                            log.info("Creating global user: {}", user);
-                            return User.withUsername(user.username())
-                                    .password(user.password())
-                                    .roles(user.roles())
-                                    .build();
-                        })
-                        .toList()
-        );
-    }
-
-    @Bean
-    public UserDetailsService jdbcUserDetailsService() {
-        var users = new JdbcUserDetailsManager(datasource);
-        users.setUsersByUsernameQuery("SELECT username, password, TRUE AS enabled FROM users WHERE username = ?");
-        users.setAuthoritiesByUsernameQuery("SELECT username, 'ROLE_ADMIN' AS authority FROM users WHERE username = ?");
-        return users;
     }
 }

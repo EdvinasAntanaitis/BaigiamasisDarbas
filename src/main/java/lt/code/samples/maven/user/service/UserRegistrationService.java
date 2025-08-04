@@ -41,10 +41,6 @@ public class UserRegistrationService {
         return userRepository.findAll();
     }
 
-    public void deleteUserById(Long id) {
-        userRepository.deleteById(id);
-    }
-
     public void updateUser(Long id, String firstName, String lastName, String email, String password, String role) {
         UserEntity user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
 
