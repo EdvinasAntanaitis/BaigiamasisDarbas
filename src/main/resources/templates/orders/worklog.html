@@ -13,11 +13,29 @@
 
     <h2 class="mb-4">Work Start / End</h2>
 
-    <form th:action="@{/orders/worklog/search}" method="get" class="mb-3">
-        <label for="orderId">Search order by ID:</label>
-        <input type="number" id="orderId" name="orderId" required>
+    <!-- Paieška + QR skaneris -->
+    <form th:action="@{/orders/worklog/search}" method="get" class="mb-3 d-flex align-items-center gap-2">
+        <label for="orderId" class="me-2">Search order by ID:</label>
+        <input type="number" id="orderId" name="orderId" class="form-control" required style="max-width:140px;">
         <button type="submit" class="btn btn-primary">Search</button>
+        <button type="button" class="btn btn-secondary" onclick="openQrScanner()">Scan QR</button>
     </form>
+
+    <!-- QR modalas -->
+    <div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="qrModalLabel">Scan QR code</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="reader" style="width:100%"></div>
+                    <div id="qrResult" class="mt-2 text-danger"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <p><strong>Logged in user:</strong>
         <span th:text="${#authentication?.principal?.firstName + ' ' + #authentication?.principal?.lastName}">User name</span>
@@ -49,7 +67,6 @@
                     <span th:unless="${log.endTime != null}">...</span>
                 </td>
                 <td th:text="${log.operationName}">Operation</td>
-
                 <td>
                     <button type="button"
                             class="btn btn-danger btn-sm"
@@ -60,25 +77,22 @@
                             th:if="${log.endTime == null and !log.faulty}">
                         Mark as Faulty
                     </button>
-
                     <form th:if="${log.faulty and !log.faultFixed}" method="post"
                           th:action="@{/orders/worklog/fix/{id}(id=${log.id})}"
                           style="display:inline">
                         <button type="submit" class="btn btn-secondary btn-sm">Fix Fault</button>
                     </form>
-
                     <div th:if="${log.faulty and log.faultFixed}" class="badge bg-info text-dark mt-1">
                         Fault fixed
                     </div>
-
-                <form th:if="${log.endTime == null}"
-                      th:unless="${log.faulty and !log.faultFixed}"
-                      th:action="@{/orders/worklog/end}" method="post" style="display:inline;">
-                    <input type="hidden" name="workLogId" th:value="${log.id}" />
-                    <button type="submit" class="btn btn-warning btn-sm">End</button>
-                </form>
-            </td>
-
+                    <form th:if="${log.endTime == null}"
+                          th:unless="${log.faulty and !log.faultFixed}"
+                          th:action="@{/orders/worklog/end}" method="post" style="display:inline;">
+                        <input type="hidden" name="workLogId" th:value="${log.id}" />
+                        <button type="submit" class="btn btn-warning btn-sm">End</button>
+                    </form>
+                </td>
+            </tr>
             </tbody>
         </table>
 
@@ -102,6 +116,7 @@
     <a class="btn btn-primary mt-3" th:href="@{/dashboard}">Back to Dashboard</a>
 </div>
 
+<!-- Start Work Modal -->
 <div class="modal fade" id="startWorkModal" tabindex="-1" aria-labelledby="startWorkLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -128,6 +143,7 @@
     </div>
 </div>
 
+<!-- Fault Modal -->
 <div class="modal fade" id="faultModal" tabindex="-1" aria-labelledby="faultModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -158,16 +174,52 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
 <script>
     function setWorkLogId(button) {
         const workLogId = button.getAttribute("data-worklog-id");
-        const operationName = button.getAttribute("data-operation-name");
-        const faultDescription = button.getAttribute("data-fault-description");
-
         document.getElementById("faultWorkLogId").value = workLogId;
-        document.getElementById("faultOperationName").value = operationName;
-        document.getElementById("faultDescription").value = faultDescription || '';
+        document.getElementById("faultOperationName").value = button.getAttribute("data-operation-name") || '';
+        document.getElementById("faultDescription").value = button.getAttribute("data-fault-description") || '';
     }
+
+    let qrScanner = null;
+    function openQrScanner() {
+        var qrModal = new bootstrap.Modal(document.getElementById('qrModal'));
+        qrModal.show();
+        if (!qrScanner) {
+            qrScanner = new Html5Qrcode("reader");
+        }
+        qrScanner.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: 250 },
+            (decodedText) => {
+                qrScanner.stop();
+                document.getElementById('reader').innerHTML = "";
+                qrModal.hide();
+                // Jei nuoroda – atidaro
+                if (decodedText.startsWith('http')) {
+                    window.location.href = decodedText;
+                    // Jei tik ID
+                } else if (!isNaN(decodedText)) {
+                    document.getElementById('orderId').value = decodedText;
+                    document.querySelector('form').submit();
+                } else {
+                    document.getElementById('qrResult').textContent = "Unrecognized QR code";
+                }
+            },
+            (errorMessage) => {}
+        ).catch(err => {
+            document.getElementById('qrResult').textContent = "Could not start camera: " + err;
+        });
+    }
+    document.getElementById('qrModal').addEventListener('hidden.bs.modal', function () {
+        if (qrScanner) {
+            qrScanner.stop();
+            document.getElementById('reader').innerHTML = "";
+        }
+    });
 </script>
+
 </body>
 </html>

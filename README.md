@@ -22,7 +22,7 @@ Aplikacijos paleidimas:
 Paleisti pgAdmin 4 serveri.
 
 Paleisti springboot aplikacija, tada i terminala ivesti sia komanda:
-C:\ngrok\ngrok.exe http http://localhost:8080.
+C:\ngrok\ngrok.exe http 8080
 
 Kai uzsikraus terminale ngrok, nukopijuok linka kury gali ivesti, i crome
 ar kita aplikacija.

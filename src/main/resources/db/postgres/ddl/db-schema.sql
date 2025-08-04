@@ -48,3 +48,4 @@ CREATE TABLE IF NOT EXISTS work_log_entity (
                                                CONSTRAINT fk_work_log_order FOREIGN KEY (order_id) REFERENCES orders(id)
 );
 
+ALTER TABLE orders ADD COLUMN qr_code_image TEXT;

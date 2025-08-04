@@ -8,6 +8,10 @@
 <body>
 <div class="container mt-5">
     <h1 class="mb-4">Užsakymas: <span th:text="${order.orderName}">Pavadinimas</span></h1>
+    <img th:if="${order.qrCodeImageBase64 != null}"
+         th:src="'data:image/png;base64,' + ${order.qrCodeImageBase64}"
+         alt="QR Kodas" style="max-width:200px;"/>
+
 
     <p><strong>Bendra kvadratūra:</strong> <span th:text="${#numbers.formatDecimal(totalArea, 0, 2)}"/> m²</p>
 

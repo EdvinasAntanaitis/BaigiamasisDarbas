@@ -15,8 +15,12 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Lob
+    @Column(name = "qr_code_image")
+    private String qrCodeImageBase64;
+
     // Pridėtas orderNumber laukas, nes duomenų bazė reikalauja
-    @Column(name = "order_number", nullable = false)
+    @Column(name = "order_number", nullable = false, unique = true)
     private String orderNumber;
 
     private String orderName;
@@ -48,7 +52,7 @@ public class Order {
         if (creationDate == null) {
             creationDate = LocalDateTime.now();
         }
-        // orderNumber turi būti priskirtas PRIEŠ išsaugant (čia pavyzdys su UUID)
+        // Jei orderNumber nepriskirtas – priskiriam UUID automatiškai
         if (orderNumber == null) {
             orderNumber = java.util.UUID.randomUUID().toString();
         }
