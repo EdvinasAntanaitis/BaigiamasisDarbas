@@ -94,12 +94,12 @@
             <td><input type="number" name="partGroups[${groupIdx}].parts[${index}].amount" class="form-control amount" value="1" min="1" required oninput="calculateAllAreas()"></td>
             <td>
                 <select name="partGroups[${groupIdx}].parts[${index}].paintedArea" class="form-select painted" onchange="calculateAllAreas()">
-                    <option value="ALL_SIDES">Visa detalė (default)</option>
-                    <option value="ONE_EDGE">Viena briauna</option>
-                    <option value="TWO_EDGES">Dvi briaunos</option>
-                    <option value="THREE_EDGES">Trys briaunos</option>
-                    <option value="ONE_SIDE_NO_EDGES">Viena pusė be briaunų</option>
-                    <option value="ONE_SIDE_WITH_EDGES">Viena pusė su briaunomis</option>
+                    <option value="ALL_SIDES">Full detail (default)</option>
+                    <option value="ONE_EDGE">One edge</option>
+                    <option value="TWO_EDGES">Two edges</option>
+                    <option value="THREE_EDGES">Three edges</option>
+                    <option value="ONE_SIDE_NO_EDGES">One side without edges</option>
+                    <option value="ONE_SIDE_WITH_EDGES">One side with edges</option>
                 </select>
             </td>
             <td class="area">0.000</td>

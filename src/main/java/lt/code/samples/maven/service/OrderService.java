@@ -32,6 +32,8 @@ public class OrderService {
         if (order.getOrderNumber() == null) {
             order.setOrderNumber(java.util.UUID.randomUUID().toString());
         }
+
+        //TODO: Change this url link to proper then web name is finaly chosen.
         String qrContent = "http://localhost:8080/orders/" + order.getOrderNumber();
         try {
             byte[] qrImage = QRCodeGenerator.generateQRCodeImage(qrContent, 200, 200);
