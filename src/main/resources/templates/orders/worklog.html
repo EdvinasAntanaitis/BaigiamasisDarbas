@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Work Log</title>
+    <title th:text="#{worklog.title}">Work Log</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
@@ -11,22 +11,22 @@
     <div th:if="${message}" class="alert alert-success" role="alert" th:text="${message}"></div>
     <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
 
-    <h2 class="mb-4">Work Start / End</h2>
+    <h2 class="mb-4" th:text="#{worklog.header}">Work Start / End</h2>
 
-    <!-- Paieška + QR skaneris -->
+    <!-- Search + QR scanner -->
     <form th:action="@{/orders/worklog/search}" method="get" class="mb-3 d-flex align-items-center gap-2">
-        <label for="orderId" class="me-2">Search order by ID:</label>
+        <label for="orderId" class="me-2" th:text="#{worklog.search.label}">Search order by ID:</label>
         <input type="number" id="orderId" name="orderId" class="form-control" required style="max-width:140px;">
-        <button type="submit" class="btn btn-primary">Search</button>
-        <button type="button" class="btn btn-secondary" onclick="openQrScanner()">Scan QR</button>
+        <button type="submit" class="btn btn-primary" th:text="#{worklog.search.button}">Search</button>
+        <button type="button" class="btn btn-secondary" onclick="openQrScanner()" th:text="#{worklog.qr.button}">Scan QR</button>
     </form>
 
-    <!-- QR modalas -->
+    <!-- QR modal -->
     <div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="qrModalLabel">Scan QR code</h5>
+                    <h5 class="modal-title" id="qrModalLabel" th:text="#{worklog.qr.modal.title}">Scan QR code</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -37,25 +37,27 @@
         </div>
     </div>
 
-    <p><strong>Logged in user:</strong>
+    <p>
+        <strong th:text="#{worklog.loggedin}">Logged in user:</strong>
         <span th:text="${#authentication?.principal?.firstName + ' ' + #authentication?.principal?.lastName}">User name</span>
     </p>
 
     <div th:if="${order != null}">
-        <h4 th:text="'Order: ' + ${order.orderName}"></h4>
-        <p><strong>Description:</strong> <span th:text="${order.description}"></span></p>
-        <p><strong>Paint Type:</strong>
-            <span th:text="${!order.partGroups.isEmpty()} ? ${order.partGroups[0].paintColor} : 'Not specified'">Not specified</span>
+        <h4><span th:text="#{worklog.order}">Order:</span> <span th:text="${order.orderName}"></span></h4>
+        <p><strong th:text="#{worklog.description}">Description:</strong> <span th:text="${order.description}"></span></p>
+        <p>
+            <strong th:text="#{worklog.paint.type}">Paint Type:</strong>
+            <span th:text="${!order.partGroups.isEmpty()} ? ${order.partGroups[0].paintColor} : #{worklog.not.specified}">Not specified</span>
         </p>
 
-        <h3 class="mt-4">Performed operations / Ongoing tasks</h3>
+        <h3 class="mt-4" th:text="#{worklog.performed.operations}">Performed operations / Ongoing tasks</h3>
         <table class="table table-bordered">
             <thead>
             <tr>
-                <th>Worker</th>
-                <th>Date and Time</th>
-                <th>Operation</th>
-                <th>Action</th>
+                <th th:text="#{worklog.worker}">Worker</th>
+                <th th:text="#{worklog.date.time}">Date and Time</th>
+                <th th:text="#{worklog.operation}">Operation</th>
+                <th th:text="#{worklog.action}">Action</th>
             </tr>
             </thead>
             <tbody>
@@ -74,22 +76,21 @@
                             data-bs-target="#faultModal"
                             th:attr="data-worklog-id=${log.id}"
                             onclick="setWorkLogId(this)"
-                            th:if="${log.endTime == null and !log.faulty}">
+                            th:if="${log.endTime == null and !log.faulty}"
+                            th:text="#{worklog.mark.faulty}">
                         Mark as Faulty
                     </button>
                     <form th:if="${log.faulty and !log.faultFixed}" method="post"
                           th:action="@{/orders/worklog/fix/{id}(id=${log.id})}"
                           style="display:inline">
-                        <button type="submit" class="btn btn-secondary btn-sm">Fix Fault</button>
+                        <button type="submit" class="btn btn-secondary btn-sm" th:text="#{worklog.fix.fault}">Fix Fault</button>
                     </form>
-                    <div th:if="${log.faulty and log.faultFixed}" class="badge bg-info text-dark mt-1">
-                        Fault fixed
-                    </div>
+                    <div th:if="${log.faulty and log.faultFixed}" class="badge bg-info text-dark mt-1" th:text="#{worklog.fault.fixed}">Fault fixed</div>
                     <form th:if="${log.endTime == null}"
                           th:unless="${log.faulty and !log.faultFixed}"
                           th:action="@{/orders/worklog/end}" method="post" style="display:inline;">
                         <input type="hidden" name="workLogId" th:value="${log.id}" />
-                        <button type="submit" class="btn btn-warning btn-sm">End</button>
+                        <button type="submit" class="btn btn-warning btn-sm" th:text="#{worklog.end}">End</button>
                     </form>
                 </td>
             </tr>
@@ -97,23 +98,21 @@
         </table>
 
         <div class="mt-4 d-flex gap-3">
-            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#startWorkModal">
-                Start Work
-            </button>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#startWorkModal" th:text="#{worklog.start.work}">Start Work</button>
         </div>
 
         <form th:action="@{/orders/end}" method="post" th:if="${order != null}">
             <input type="hidden" name="orderId" th:value="${order.id}" />
-            <button class="btn btn-success mt-3">End Order</button>
+            <button class="btn btn-success mt-3" th:text="#{worklog.end.order}">End Order</button>
         </form>
 
         <div class="mt-5">
-            <h5>Order Description</h5>
+            <h5 th:text="#{worklog.order.description}">Order Description</h5>
             <textarea class="form-control" rows="3" disabled th:text="${order.description}"></textarea>
         </div>
     </div>
 
-    <a class="btn btn-primary mt-3" th:href="@{/dashboard}">Back to Dashboard</a>
+    <a class="btn btn-primary mt-3" th:href="@{/dashboard}" th:text="#{worklog.back.dashboard}">Back to Dashboard</a>
 </div>
 
 <!-- Start Work Modal -->
@@ -122,21 +121,21 @@
         <div class="modal-content">
             <form method="post" th:action="@{/orders/worklog/start}">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="startWorkLabel">Select Operation</h5>
+                    <h5 class="modal-title" id="startWorkLabel" th:text="#{worklog.start.modal.title}">Select Operation</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="orderId" th:value="${order?.id}" />
                     <select name="operation" class="form-select" required>
-                        <option value="">-- Choose operation --</option>
-                        <option value="Sanding">Sanding</option>
-                        <option value="Priming">Priming</option>
-                        <option value="Painting">Painting</option>
-                        <option value="Lacquering">Lacquering</option>
+                        <option value="" th:text="#{worklog.start.modal.choose}">-- Choose operation --</option>
+                        <option value="Sanding" th:text="#{worklog.start.modal.sanding}">Sanding</option>
+                        <option value="Priming" th:text="#{worklog.start.modal.priming}">Priming</option>
+                        <option value="Painting" th:text="#{worklog.start.modal.painting}">Painting</option>
+                        <option value="Lacquering" th:text="#{worklog.start.modal.lacquering}">Lacquering</option>
                     </select>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success">Start</button>
+                    <button type="submit" class="btn btn-success" th:text="#{worklog.start.modal.start}">Start</button>
                 </div>
             </form>
         </div>
@@ -149,24 +148,24 @@
         <div class="modal-content">
             <form th:action="@{/orders/worklog/fault}" method="post">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="faultModalLabel">Mark as Faulty</h5>
+                    <h5 class="modal-title" id="faultModalLabel" th:text="#{worklog.fault.modal.title}">Mark as Faulty</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="faultWorkLogId" name="workLogId"/>
 
                     <div class="mb-2">
-                        <label>Operation Name:</label>
+                        <label th:text="#{worklog.fault.modal.operation.name}">Operation Name:</label>
                         <input type="text" id="faultOperationName" name="operationName" class="form-control" required />
                     </div>
 
                     <div class="mb-2">
-                        <label>Fault Description:</label>
+                        <label th:text="#{worklog.fault.modal.fault.description}">Fault Description:</label>
                         <textarea id="faultDescription" name="faultDescription" class="form-control" rows="3"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-danger">Confirm Fault</button>
+                    <button type="submit" class="btn btn-danger" th:text="#{worklog.fault.modal.confirm}">Confirm Fault</button>
                 </div>
             </form>
         </div>
@@ -197,20 +196,18 @@
                 qrScanner.stop();
                 document.getElementById('reader').innerHTML = "";
                 qrModal.hide();
-                // Jei nuoroda – atidaro
                 if (decodedText.startsWith('http')) {
                     window.location.href = decodedText;
-                    // Jei tik ID
                 } else if (!isNaN(decodedText)) {
                     document.getElementById('orderId').value = decodedText;
                     document.querySelector('form').submit();
                 } else {
-                    document.getElementById('qrResult').textContent = "Unrecognized QR code";
+                    document.getElementById('qrResult').textContent = /*[[#{worklog.qr.unrecognized}]]*/ "Unrecognized QR code";
                 }
             },
             (errorMessage) => {}
         ).catch(err => {
-            document.getElementById('qrResult').textContent = "Could not start camera: " + err;
+            document.getElementById('qrResult').textContent = /*[[#{worklog.qr.camerafail}]]*/ "Could not start camera:" + err;
         });
     }
     document.getElementById('qrModal').addEventListener('hidden.bs.modal', function () {
