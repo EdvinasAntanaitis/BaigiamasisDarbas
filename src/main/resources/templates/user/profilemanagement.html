@@ -85,7 +85,7 @@
                                     <div class="col-md-6">
                                         <label class="form-label" th:text="#{profile.role}">Role</label>
                                         <select name="role" class="form-select">
-                                            <option value="ROLE_USER" th:selected="${user.role == 'ROLE_WORKER'}" th:text="#{profile.role.worker}">WORKER</option>
+                                            <option value="ROLE_WORKER" th:selected="${user.role == 'ROLE_WORKER'}" th:text="#{profile.role.worker}">WORKER</option>
                                             <option value="ROLE_ADMIN" th:selected="${user.role == 'ROLE_ADMIN'}" th:text="#{profile.role.admin}">ADMIN</option>
                                             <option value="ROLE_CLIENT" th:selected="${user.role == 'ROLE_CLIENT'}" th:text="#{profile.role.client}">CLIENT</option>
                                         </select>

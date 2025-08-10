@@ -22,39 +22,25 @@ public class UserService {
     private final AuthorityRepository authorityRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Transactional
-    public void updateUser(Long id, String firstName, String lastName,
-                           String email, String password, String roleIgnored) {
-
-        UserEntity user = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
-        user.setEmail(email);
-
-        if (password != null && !password.isBlank()) {
-            user.setPassword(passwordEncoder.encode(password));
-        }
-
-        userRepository.save(user);
-    }
-
     @Transactional(readOnly = true)
     public UserDto getUserDtoByUsername(String username) {
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
+        String role = user.getAuthorities().stream()
+                .findFirst()
+                .map(AuthorityEntity::getAuthority)
+                .orElse("USER");
+
         return UserDto.builder()
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .email(user.getEmail())
-                .role(user.getAuthorities().stream()
-                        .findFirst()
-                        .map(AuthorityEntity::getAuthority)
-                        .orElse("USER"))
+                .role(role)
+                .id(user.getId()) // jei getId() yra long, veiks su autoboxing; jei ne – Long.valueOf(user.getId())
                 .build();
     }
+
 
     @Transactional
     public void updateUserAdmin(UserUpdateDto dto) {

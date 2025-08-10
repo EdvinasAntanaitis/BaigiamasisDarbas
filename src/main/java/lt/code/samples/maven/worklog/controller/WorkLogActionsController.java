@@ -4,11 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lt.code.samples.maven.order.model.OrderEntity;
 import lt.code.samples.maven.worklog.dto.FaultRequestDto;
 import lt.code.samples.maven.worklog.dto.StartWorkRequestDto;
-import lt.code.samples.maven.worklog.service.WorkLogEndService;
-import lt.code.samples.maven.worklog.service.WorkLogFaultService;
-import lt.code.samples.maven.worklog.service.WorkLogFixService;
-import lt.code.samples.maven.worklog.service.WorkLogStartService;
+import lt.code.samples.maven.worklog.service.*;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -27,12 +25,13 @@ public class WorkLogActionsController {
     @PostMapping("/start")
     public String start(@RequestParam Long orderId,
                         @RequestParam String operation,
+                        Authentication authentication,
                         RedirectAttributes ra) {
-        StartWorkRequestDto req = new StartWorkRequestDto(orderId, operation);
-        OrderEntity order = workLogStartService.startWork(req.orderId(), null, req.operation());
+        var order = workLogStartService.startWork(orderId, authentication, operation);
         ra.addFlashAttribute("message", "Darbas pradėtas.");
         return "redirect:/orders/worklog?orderId=" + order.getId();
     }
+
 
     @PostMapping("/end")
     public String end(@RequestParam Long workLogId,

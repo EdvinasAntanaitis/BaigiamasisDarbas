@@ -5,8 +5,12 @@ import lt.code.samples.maven.order.model.OrderEntity;
 import lt.code.samples.maven.order.repository.OrderRepository;
 import lt.code.samples.maven.worklog.repository.WorkLogRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Service
@@ -43,20 +47,46 @@ public class WorkLogService {
         return orderRepository.findById(id);
     }
 
-    public OrderEntity startWork(Long orderId, String workerName, String operationName) {
+    @Transactional
+    public OrderEntity startWork(Long orderId, Authentication authentication, String operation) {
         OrderEntity order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
 
-        WorkLogEntity workLog = new WorkLogEntity();
-        workLog.setOrder(order);
+        String workerName = (authentication != null) ? authentication.getName() : "Unknown";
 
-        workLog.setWorkerName(workerName);
-        workLog.setOperationName(operationName);
+        WorkLogEntity wl = new WorkLogEntity();
+        wl.setOrder(order);
+        wl.setOperationName(operation);
+        wl.setWorkerName(workerName);
+        wl.setStartTime(LocalDateTime.now());
+        wl.setFaulty(false);
+        wl.setFaultFixed(false);
 
-        workLog.setStartTime(LocalDateTime.now());
+        workLogRepository.save(wl);
 
-        workLogRepository.save(workLog);
+        if (order.getWorkLogs() == null) {
+            order.setWorkLogs(new ArrayList<>());
+        }
+        order.getWorkLogs().add(wl);
+
         return order;
+    }
+
+    private String resolveWorkerName(Authentication authentication) {
+        if (authentication == null || authentication.getPrincipal() == null) {
+            return "Unknown";
+        }
+
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof lt.code.samples.maven.user.model.UserEntity u) {
+            String fn = u.getFirstName() != null ? u.getFirstName().trim() : "";
+            String ln = u.getLastName() != null ? u.getLastName().trim() : "";
+            return (fn + " " + ln).trim().isEmpty() ? u.getUsername() : (fn + " " + ln).trim();
+        }
+        if (principal instanceof org.springframework.security.core.userdetails.User u2) {
+            return u2.getUsername();
+        }
+        return principal.toString();
     }
 
 
@@ -83,5 +113,21 @@ public class WorkLogService {
 
     public void save(WorkLogEntity log) {
         workLogRepository.save(log);
+    }
+
+    @Transactional
+    public void startWork(Long orderId, String operation, String workerName) {
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
+
+        WorkLogEntity wl = new WorkLogEntity();
+        wl.setOrder(order);
+        wl.setOperationName(operation);
+        wl.setStartTime(java.time.LocalDateTime.now());
+        wl.setFaulty(false);
+        wl.setFaultFixed(false);
+        wl.setWorkerName(workerName);
+
+        workLogRepository.save(wl);
     }
 }
