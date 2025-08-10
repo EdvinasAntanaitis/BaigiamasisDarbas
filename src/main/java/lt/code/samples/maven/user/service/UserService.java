@@ -1,9 +1,12 @@
 package lt.code.samples.maven.user.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lt.code.samples.maven.user.dto.UserDto;
+import lt.code.samples.maven.user.dto.UserUpdateDto;
 import lt.code.samples.maven.user.model.AuthorityEntity;
 import lt.code.samples.maven.user.model.UserEntity;
+import lt.code.samples.maven.user.repository.AuthorityRepository;
 import lt.code.samples.maven.user.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,13 +19,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final AuthorityRepository authorityRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     public void updateUser(Long id, String firstName, String lastName,
-                           String email, String password, String role) {
+                           String email, String password, String roleIgnored) {
 
         UserEntity user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         user.setFirstName(firstName);
         user.setLastName(lastName);
@@ -35,6 +40,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional(readOnly = true)
     public UserDto getUserDtoByUsername(String username) {
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
@@ -51,28 +57,71 @@ public class UserService {
     }
 
     @Transactional
+    public void updateUserAdmin(UserUpdateDto dto) {
+        updateUserAdmin(
+                Long.parseLong(dto.getId()),
+                dto.getEmail(),
+                dto.getFirstName(),
+                dto.getLastName(),
+                dto.getPhoneNumber(),
+                normalizeRole(dto.getRole()),
+                dto.getPassword()
+        );
+    }
+
+    @Transactional
+    public void updateUserAdmin(Long id,
+                                String email,
+                                String firstName,
+                                String lastName,
+                                String phoneNumber,
+                                String role,
+                                String rawPasswordOrNull) {
+
+        UserEntity user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        user.setEmail(email);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setPhoneNumber(phoneNumber);
+
+        if (rawPasswordOrNull != null && !rawPasswordOrNull.isBlank()) {
+            user.setPassword(passwordEncoder.encode(rawPasswordOrNull));
+        }
+
+        user.getAuthorities().clear();
+        AuthorityEntity authority = authorityRepository.findByName(role)
+                .orElseGet(() -> {
+                    AuthorityEntity a = new AuthorityEntity();
+                    a.setName(role);
+                    return authorityRepository.save(a);
+                });
+        user.getAuthorities().add(authority);
+
+        userRepository.save(user);
+    }
+
+    @Transactional
     public void deleteUserById(Long id) {
         String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity current = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new EntityNotFoundException("Current user not found"));
 
-        UserEntity currentUser = userRepository.findByUsername(currentUsername)
-                .orElseThrow(() -> new RuntimeException("Current user not found"));
-
-        if (currentUser.getId() == id) {
-            throw new RuntimeException("Cannot delete yourself.");
+        if (current.getId() == id) {
+            throw new IllegalArgumentException("Cannot delete yourself.");
         }
 
         UserEntity user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        // 🧹 Išvalom roles iš vartotojo
         user.getAuthorities().clear();
-        userRepository.save(user); // būtina, kad būtų atnaujintas tarp lentelių ryšys
-
-        // 🗑 Dabar galime ištrinti naudotoją
+        userRepository.save(user);
         userRepository.delete(user);
     }
 
-
+    private String normalizeRole(String role) {
+        if (role == null) return null;
+        return role.startsWith("ROLE_") ? role : "ROLE_" + role;
+    }
 }
-
-

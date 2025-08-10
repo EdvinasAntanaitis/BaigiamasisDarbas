@@ -30,7 +30,6 @@ public class FieldsStringCompareValidator implements ConstraintValidator<FieldsS
                     Objects.nonNull(secondFieldValue) &&
                     firstFieldValue.equals(secondFieldValue);
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            //
         }
 
         return false;

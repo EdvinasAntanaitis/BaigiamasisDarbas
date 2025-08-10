@@ -80,7 +80,6 @@ public class UserEntity implements UserDetails {
         this.authorities.add(newRole);
     }
 
-    /** Jei kada prireiktų greitai gauti vieną (pirmą) rolę kaip String. */
     public String getRole() {
         return authorities.stream()
                 .findFirst()

@@ -49,3 +49,5 @@ CREATE TABLE IF NOT EXISTS work_log_entity (
 );
 
 ALTER TABLE orders ADD COLUMN qr_code_image TEXT;
+
+alter table orders drop column qr_code_image;

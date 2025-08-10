@@ -49,10 +49,9 @@ public class UserRegistrationService {
         user.setEmail(email);
 
         if (password != null && !password.isBlank()) {
-            user.setPassword(passwordEncoder.encode(password)); // Įsitikink, kad turi passwordEncoder!
+            user.setPassword(passwordEncoder.encode(password));
         }
 
-        // Role keitimas (paprastas variantas)
         user.getAuthorities().clear();
         AuthorityEntity authority = authorityRepository.findByName("ROLE_" + role)
                 .orElseThrow(() -> new RuntimeException("Role not found: " + role));

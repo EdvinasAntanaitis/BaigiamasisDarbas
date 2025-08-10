@@ -33,8 +33,8 @@ public class BasicSecurityConfig {
         return http
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/login/**").permitAll()
+                        .requestMatchers("/api/**").authenticated()
                         .requestMatchers("/orders/new").hasRole("ADMIN")
-                        .requestMatchers("/user/profilemanagement").hasRole("ADMIN")
                         .requestMatchers("/user/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
