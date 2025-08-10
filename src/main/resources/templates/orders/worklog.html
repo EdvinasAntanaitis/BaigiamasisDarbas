@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title th:text="#{worklog.title}">Work Log</title>
@@ -59,17 +58,13 @@
             </div>
             <div class="col-md-4">
                 <strong th:text="#{worklog.material}">Material:</strong>
-                <span th:if="${order.partGroups != null and !order.partGroups.isEmpty()}"
-                      th:text="${order.partGroups.get(0).material}">—</span>
-                <span th:unless="${order.partGroups != null and !order.partGroups.isEmpty()}"
-                      th:text="#{worklog.not.specified}">Not specified</span>
+                <span th:if="${order.partGroups != null and !order.partGroups.isEmpty()}" th:text="${order.partGroups.get(0).material}">—</span>
+                <span th:unless="${order.partGroups != null and !order.partGroups.isEmpty()}" th:text="#{worklog.not.specified}">Not specified</span>
             </div>
             <div class="col-md-4">
                 <strong th:text="#{worklog.paint.type}">Paint Type:</strong>
-                <span th:if="${order.partGroups != null and !order.partGroups.isEmpty()}"
-                      th:text="${order.partGroups.get(0).paintColor}">—</span>
-                <span th:unless="${order.partGroups != null and !order.partGroups.isEmpty()}"
-                      th:text="#{worklog.not.specified}">Not specified</span>
+                <span th:if="${order.partGroups != null and !order.partGroups.isEmpty()}" th:text="${order.partGroups.get(0).paintColor}">—</span>
+                <span th:unless="${order.partGroups != null and !order.partGroups.isEmpty()}" th:text="#{worklog.not.specified}">Not specified</span>
             </div>
         </div>
 
@@ -114,17 +109,13 @@
                             Mark as Faulty
                         </button>
 
-                        <form th:if="${log.faulty and !log.faultFixed}"
-                              th:action="@{/orders/worklog/fix/{id}(id=${log.id})}"
-                              method="post" class="d-inline">
+                        <form th:if="${log.faulty and !log.faultFixed}" th:action="@{/orders/worklog/fix/{id}(id=${log.id})}" method="post" class="d-inline">
                             <input type="hidden" name="orderId" th:value="${order.id}"/>
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                             <button type="submit" class="btn btn-secondary btn-sm" th:text="#{worklog.fix.fault}">Fix Fault</button>
                         </form>
 
-                        <form th:if="${log.endTime == null and !(log.faulty and !log.faultFixed)}"
-                              th:action="@{/orders/worklog/end}"
-                              method="post" class="d-inline">
+                        <form th:if="${log.endTime == null and !(log.faulty and !log.faultFixed)}" th:action="@{/orders/worklog/end}" method="post" class="d-inline">
                             <input type="hidden" name="workLogId" th:value="${log.id}"/>
                             <input type="hidden" name="orderId" th:value="${order.id}"/>
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
@@ -197,12 +188,10 @@
                     <input type="hidden" id="faultWorkLogId" name="workLogId"/>
                     <input type="hidden" name="orderId" th:value="${order?.id}"/>
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-
                     <div class="mb-2">
                         <label class="form-label" th:text="#{worklog.fault.modal.operation.name}">Operation Name:</label>
                         <input type="text" id="faultOperationName" name="operationName" class="form-control" required/>
                     </div>
-
                     <div class="mb-2">
                         <label class="form-label" th:text="#{worklog.fault.modal.fault.description}">Fault Description:</label>
                         <textarea id="faultDescription" name="faultDescription" class="form-control" rows="3"></textarea>
@@ -212,6 +201,23 @@
                     <button type="submit" class="btn btn-danger" th:text="#{worklog.fault.modal.confirm}">Confirm Fault</button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<div th:if="${error}" class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Cannot Complete Order</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0" th:text="${error} ">Can't complete this order. Some tasks are still in progress or there are unresolved faults.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
+            </div>
         </div>
     </div>
 </div>
@@ -233,9 +239,7 @@
         const qrModal = new bootstrap.Modal(qrModalEl);
         qrModal.show();
 
-        if (!qrScanner) {
-            qrScanner = new Html5Qrcode("reader");
-        }
+        if (!qrScanner) qrScanner = new Html5Qrcode("reader");
         qrScanner.start(
             { facingMode: "environment" },
             { fps: 10, qrbox: 250 },
@@ -244,19 +248,12 @@
                     document.getElementById('reader').innerHTML = "";
                     qrModal.hide();
                 });
-
-                if (decodedText.startsWith('http')) {
-                    window.location.href = decodedText;
-                    return;
-                }
-
+                if (decodedText.startsWith('http')) { window.location.href = decodedText; return; }
                 if (!isNaN(decodedText)) {
-                    const input = document.getElementById('orderId');
-                    input.value = decodedText;
+                    document.getElementById('orderId').value = decodedText;
                     document.getElementById('searchForm').submit();
                     return;
                 }
-
                 document.getElementById('qrResult').textContent = "Unrecognized QR code";
             },
             () => {}
@@ -266,13 +263,18 @@
 
         qrModalEl.addEventListener('hidden.bs.modal', function () {
             if (qrScanner) {
-                qrScanner.stop().finally(() => {
-                    document.getElementById('reader').innerHTML = "";
-                });
+                qrScanner.stop().finally(() => { document.getElementById('reader').innerHTML = ""; });
             }
         }, { once: true });
     }
-</script>
 
+    document.addEventListener('DOMContentLoaded', function () {
+        const hasError = false;
+        if (hasError) {
+            const m = new bootstrap.Modal(document.getElementById('errorModal'));
+            m.show();
+        }
+    });
+</script>
 </body>
 </html>

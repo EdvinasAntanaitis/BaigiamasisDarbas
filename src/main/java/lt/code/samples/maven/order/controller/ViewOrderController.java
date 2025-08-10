@@ -27,9 +27,14 @@ public class ViewOrderController {
 
     @PostMapping("/end")
     public String endOrder(@RequestParam Long orderId, RedirectAttributes ra) {
-        orderPageService.endOrder(orderId);
-        ra.addFlashAttribute("message", "Order ended successfully.");
-        return "redirect:/orders";
+        try {
+            orderPageService.endOrder(orderId);
+            ra.addFlashAttribute("message", "Order successfully completed.");
+        } catch (lt.code.samples.maven.common.exception.ConflictException e) {
+            ra.addFlashAttribute("error",
+                    "Can't complete this order. Some tasks are still in progress or there are unresolved faults.");
+        }
+        return "redirect:/orders/worklog?orderId=" + orderId;
     }
 
     @PreAuthorize("hasRole('ADMIN')")
