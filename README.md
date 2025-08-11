@@ -10,21 +10,13 @@ Užsakymų valdymo sistema
 - Užsakymų kūrimas ir peržiūra
 - Darbų pradžios/pabaigos registravimas (Work Log)
 - Brokų žymėjimas ir taisymas
-- Dvikalbystė (i18n) – LT/EN
+- Trikalbystė (i18n) – LT/EN/UA
 - Patogi web sąsaja (Thymeleaf + Bootstrap)
 Aplikacijos paleidimas:
 
 Paleisti pgAdmin 4 serveri.
 
-Paleisti springboot aplikacija, tada i terminalą ivesti šia komanda:
-C:\ngrok\ngrok.exe http 8080 norint prisijungti ne lokaliai. 
-ISPĖJIMAS: Naudojamas http, tai bandant atidaryti per naršykle rodis kad tai nėra saugus tinklapis 
-apsilankimui.
-
-Kai užsikraus terminale ngrok, nukopijuok linka kurį gali įvesti, į crome naršyke
-ar kita web brouse aplikacija.
-
-Kad prisijungti prie aplikacijos dabar yra laikinai sukurtas prisijungimas.
+Kad prisijungti prie aplikacijos dabar yra laikinai sukurti prisijungimai.
 
 Username: admin
 Password: admin
@@ -34,3 +26,13 @@ Password: worker
 
 Username: client
 Password: client
+
+
+## Testavimui ne lokaliai.
+Paleisti springboot aplikacija, tada i terminalą ivesti šia komanda:
+C:\ngrok\ngrok.exe http 8080 norint prisijungti ne lokaliai.
+ISPĖJIMAS: Naudojamas http, tai bandant atidaryti per naršykle rodis kad tai nėra saugus tinklapis
+apsilankimui.
+
+Kai užsikraus terminale ngrok, nukopijuok linka kurį gali įvesti, į crome naršyke
+ar kita web brouse aplikacija.

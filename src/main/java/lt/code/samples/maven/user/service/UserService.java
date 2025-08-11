@@ -37,7 +37,7 @@ public class UserService {
                 .lastName(user.getLastName())
                 .email(user.getEmail())
                 .role(role)
-                .id(user.getId()) // jei getId() yra long, veiks su autoboxing; jei ne – Long.valueOf(user.getId())
+                .id(user.getId())
                 .build();
     }
 
