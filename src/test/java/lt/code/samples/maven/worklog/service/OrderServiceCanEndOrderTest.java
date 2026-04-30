@@ -1,6 +1,7 @@
-package lt.code.samples.maven.order.service;
+package lt.code.samples.maven.worklog.service;
 
 import lt.code.samples.maven.order.model.OrderEntity;
+import lt.code.samples.maven.order.service.OrderService;
 import lt.code.samples.maven.worklog.model.WorkLogEntity;
 import org.junit.jupiter.api.Test;
 

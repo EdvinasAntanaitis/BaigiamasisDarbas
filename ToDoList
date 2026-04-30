@@ -1,0 +1,21 @@
+Main:
+Fix language,
+remake id to uuid all id for security,
+Add to server and try qr code for finilizing,
+find and fix bugs in the end.
+
+Second:
+Add some new feat,
+forgot password,
+forgot username wich would request correct phone number and sent mesage to the phone with min 4 number random combination,
+make the web more mobile friendly,
+if starting new order there might be some flaw. So worker with authoroty wich can make new orders can take photos of those flaws,
+make it fuly working on react web,
+single page rule,
+make whole project MODULAR!!!
+
+WIP:
+working on better web ui design.
+
+Mabey:
+Try to create custom or premade animations.
