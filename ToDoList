@@ -1,5 +1,5 @@
 Main:
-Fix language,
+
 remake id to uuid all id for security,
 Add to server and try qr code for finilizing,
 find and fix bugs in the end.
