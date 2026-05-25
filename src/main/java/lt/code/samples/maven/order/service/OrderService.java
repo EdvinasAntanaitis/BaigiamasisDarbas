@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -17,7 +18,7 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
 
-    public Optional<OrderEntity> getOrderById(Long id) {
+    public Optional<OrderEntity> getOrderById(UUID id) {
         return orderRepository.findById(id);
     }
 
@@ -45,7 +46,7 @@ public class OrderService {
     }
 
     @Transactional
-    public void deleteOrder(Long id) {
+    public void deleteOrder(UUID id) {
         OrderEntity order = orderRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Order not found: " + id));
         orderRepository.delete(order);

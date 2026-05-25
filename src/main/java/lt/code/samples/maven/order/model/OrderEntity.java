@@ -5,6 +5,7 @@ import lombok.Data;
 import lt.code.samples.maven.worklog.model.WorkLogEntity;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "orders")
@@ -12,8 +13,9 @@ import java.util.List;
 public class OrderEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "uuid", updatable = false, nullable = false)
+    private UUID uuid;
 
     @Lob
     @Column(name = "qr_code_image", columnDefinition = "TEXT") // paliekam TEXT
@@ -56,5 +58,4 @@ public class OrderEntity {
             orderNumber = java.util.UUID.randomUUID().toString();
         }
     }
-
 }

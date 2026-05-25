@@ -1,15 +1,15 @@
 package lt.code.samples.maven.worklog.controller;
 
 import lombok.RequiredArgsConstructor;
-import lt.code.samples.maven.order.model.OrderEntity;
 import lt.code.samples.maven.worklog.dto.FaultRequestDto;
-import lt.code.samples.maven.worklog.dto.StartWorkRequestDto;
 import lt.code.samples.maven.worklog.service.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/orders/worklog")
@@ -23,26 +23,31 @@ public class WorkLogActionsController {
     private final WorkLogFixService workLogFixService;
 
     @PostMapping("/start")
-    public String start(@RequestParam Long orderId,
+    public String start(@RequestParam UUID orderId,
                         @RequestParam String operation,
                         Authentication authentication,
                         RedirectAttributes ra) {
-        var order = workLogStartService.startWork(orderId, authentication, operation);
-        ra.addFlashAttribute("message", "Darbas pradėtas.");
-        return "redirect:/orders/worklog?orderId=" + order.getId();
-    }
 
+        var order = workLogStartService.startWork(orderId, authentication, operation);
+
+        ra.addFlashAttribute("message", "Darbas pradėtas.");
+
+        return "redirect:/orders/worklog?orderId=" + order.getUuid();
+    }
 
     @PostMapping("/end")
     public String end(@RequestParam Long workLogId,
-                      @RequestParam Long orderId,
+                      @RequestParam UUID orderId,
                       RedirectAttributes ra) {
+
         var res = workLogEndService.endWork(workLogId);
+
         if (res.isSuccess()) {
             ra.addFlashAttribute("message", "Darbas užbaigtas.");
         } else {
             ra.addFlashAttribute("error", res.getMessage());
         }
+
         return "redirect:/orders/worklog?orderId=" + orderId;
     }
 
@@ -50,25 +55,36 @@ public class WorkLogActionsController {
     public String markFault(@RequestParam Long workLogId,
                             @RequestParam String operationName,
                             @RequestParam(required = false) String faultDescription,
-                            @RequestParam Long orderId,
+                            @RequestParam UUID orderId,
                             RedirectAttributes ra) {
+
         FaultRequestDto req = new FaultRequestDto(operationName, faultDescription);
-        workLogFaultService.markAsFaultyAndGetOrderName(workLogId, req.operationName(), req.faultDescription());
+
+        workLogFaultService.markAsFaultyAndGetOrderName(
+                workLogId,
+                req.operationName(),
+                req.faultDescription()
+        );
+
         ra.addFlashAttribute("message", "Pažymėta kaip brokas.");
+
         return "redirect:/orders/worklog?orderId=" + orderId;
     }
 
     @PostMapping("/fix/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public String fix(@PathVariable Long id,
-                      @RequestParam Long orderId,
+                      @RequestParam UUID orderId,
                       RedirectAttributes ra) {
+
         boolean fixed = workLogFixService.fixFault(id);
+
         if (fixed) {
             ra.addFlashAttribute("message", "Brokas sutvarkytas.");
         } else {
             ra.addFlashAttribute("error", "Įrašas nebuvo pažymėtas kaip brokuotas.");
         }
+
         return "redirect:/orders/worklog?orderId=" + orderId;
     }
 }

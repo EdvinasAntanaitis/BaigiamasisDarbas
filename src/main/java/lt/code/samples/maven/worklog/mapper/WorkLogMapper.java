@@ -4,12 +4,15 @@ import lt.code.samples.maven.worklog.dto.WorkLogDto;
 import lt.code.samples.maven.worklog.model.WorkLogEntity;
 
 public final class WorkLogMapper {
-    private WorkLogMapper() {}
+
+    private WorkLogMapper() {
+    }
 
     public static WorkLogDto toDto(WorkLogEntity e) {
+
         return new WorkLogDto(
                 e.getId(),
-                e.getOrder() != null ? e.getOrder().getId() : null,
+                e.getOrder() != null ? e.getOrder().getUuid() : null,
                 e.getWorkerName(),
                 e.getOperationName(),
                 e.getPaintType(),

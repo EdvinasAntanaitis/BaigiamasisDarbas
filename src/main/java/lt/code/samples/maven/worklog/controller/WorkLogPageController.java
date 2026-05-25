@@ -9,6 +9,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.UUID;
+
 @Controller
 @RequestMapping("/orders")
 @RequiredArgsConstructor
@@ -18,14 +20,16 @@ public class WorkLogPageController {
     private final WorkLogService workLogService;
 
     @GetMapping("/worklog")
-    public String worklogPage(@RequestParam(required = false) Long orderId,
+    public String worklogPage(@RequestParam(required = false) UUID orderId,
                               @RequestParam(required = false) String orderName,
                               Model model,
                               RedirectAttributes ra) {
 
         if (orderId == null && (orderName == null || orderName.isBlank())) {
+
             model.addAttribute("order", null);
             model.addAttribute("worklogs", null);
+
             return "orders/worklog";
         }
 
@@ -34,12 +38,15 @@ public class WorkLogPageController {
                 : workLogService.findOrderByName(orderName.trim()).orElse(null);
 
         if (order == null) {
+
             ra.addFlashAttribute("error", "Order not found.");
+
             return "redirect:/orders/worklog";
         }
 
         model.addAttribute("order", order);
         model.addAttribute("worklogs", order.getWorkLogs());
+
         return "orders/worklog";
     }
 }

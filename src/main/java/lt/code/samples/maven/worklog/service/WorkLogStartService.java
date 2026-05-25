@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 
 @Service
@@ -30,7 +31,7 @@ public class WorkLogStartService {
     }
 
     @Transactional
-    public OrderEntity startWork(Long orderId, Authentication auth, String operation) {
+    public OrderEntity startWork(UUID orderId, Authentication auth, String operation) {
         OrderEntity order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
 
